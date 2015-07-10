@@ -8,20 +8,30 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import java.util.concurrent.TimeUnit;
+
 import static com.jayway.restassured.RestAssured.when;
 import static org.hamcrest.Matchers.is;
 
 public class CountriesTest {
 
+    private static Thread MAIN;
+
     @AfterClass
     public static void tearDown() throws Exception {
         ReactorCountries.SERVER.shutdown().awaitSuccess();
+        MAIN.interrupt();
     }
 
     @BeforeClass
     public static void setup() throws Exception {
         RestAssured.defaultParser = Parser.JSON;
-        ReactorCountries.main();
+        MAIN = new Thread(ReactorCountries::main);
+        MAIN.start();
+        while (null == ReactorCountries.START) {
+            TimeUnit.MILLISECONDS.sleep(20);
+        }
+        ReactorCountries.START.awaitSuccess();
     }
 
     @Before

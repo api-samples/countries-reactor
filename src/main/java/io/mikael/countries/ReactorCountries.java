@@ -9,6 +9,7 @@ import reactor.io.buffer.Buffer;
 import reactor.io.net.NetStreams;
 import reactor.io.net.http.HttpServer;
 import reactor.io.net.http.model.Status;
+import reactor.rx.Promise;
 import reactor.rx.Streams;
 
 import java.io.IOException;
@@ -27,7 +28,9 @@ public class ReactorCountries {
 
     private final static ObjectMapper JSON;
 
-    static HttpServer<Buffer, Buffer> SERVER;
+    volatile static HttpServer<Buffer, Buffer> SERVER;
+
+    volatile static Promise<Void> START;
 
     static {
         JSON = new ObjectMapper();
@@ -41,7 +44,7 @@ public class ReactorCountries {
         }
     }
 
-    public static void main(final String ... args) throws Exception {
+    public static void main(final String ... args) {
         Environment.initializeIfEmpty().assignErrorJournal();
         SERVER = NetStreams.httpServer(
                 s -> s.listen(8080).dispatcher(Environment.sharedDispatcher()));
@@ -61,10 +64,10 @@ public class ReactorCountries {
                 return channel.writeWith(Streams.just(Buffer.wrap("{}", false)));
             }
         });
-        SERVER.start().awaitSuccess();
+        START = SERVER.start();
         while (true) {
             try {
-                TimeUnit.SECONDS.sleep(10);
+                TimeUnit.SECONDS.sleep(1);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
                 return;
