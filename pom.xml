@@ -21,7 +21,7 @@
         <dependency>
             <groupId>com.aol.cyclops</groupId>
             <artifactId>cyclops-try</artifactId>
-            <version>5.0.0</version>
+            <version>7.2.4</version>
         </dependency>
         <dependency>
             <groupId>io.projectreactor</groupId>
