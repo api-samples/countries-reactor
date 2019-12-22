@@ -19,7 +19,7 @@ public class CountriesTest {
 
     @AfterClass
     public static void tearDown() throws Exception {
-        ReactorCountries.SERVER.shutdown().awaitSuccess();
+        ReactorCountries.DISPOSABLE.disposeNow();
         MAIN.interrupt();
     }
 
@@ -29,14 +29,13 @@ public class CountriesTest {
         MAIN = new Thread(ReactorCountries::main);
         MAIN.start();
         while (null == ReactorCountries.START) {
-            TimeUnit.MILLISECONDS.sleep(20);
+            TimeUnit.MILLISECONDS.sleep(100);
         }
-        ReactorCountries.START.awaitSuccess();
     }
 
     @Before
     public void setUp() {
-        RestAssured.port = ReactorCountries.SERVER.getListenAddress().getPort();
+        RestAssured.port = 8080;
     }
 
     @Test
